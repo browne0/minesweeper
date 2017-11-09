@@ -19,7 +19,7 @@ class App extends Component {
     this.baseState = this.state;
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  componentDidUpdate(nextProps, nextState) {
     if (this.state.gameStatus === "running") {
       this.checkForWinner();
     }
