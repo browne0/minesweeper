@@ -7,37 +7,52 @@ class App extends Component {
     super();
 
     this.state = {
-      gameStatus: "running", // can be running, reset, or ended
+      gameStatus: "waiting", // can be running, waiting, or ended
       time: 0, // in seconds, will format later
       flagCount: 10,
       openCells: 0,
       mines: 10,
       rows: 10,
-      columns: 10,
-      intervalId: null
+      columns: 10
     };
 
     this.baseState = this.state;
   }
 
+  componentWillUpdate(nextProps, nextState) {
+    if (this.state.gameStatus === "running") {
+      this.checkForWinner();
+    }
+  }
   
+
+  checkForWinner = () => {
+    if (this.state.mines + this.state.openCells >= this.state.rows * this.state.columns) {
+      this.setState({
+        gameStatus: "winner"
+      }, alert("you won!"))
+    }
+  }
+
   componentWillMount() {
     this.intervals = [];
   }
-  
 
   setInterval = (fn, t) => {
     this.intervals.push(setInterval(fn, t));
-  }
+  };
 
   reset = () => {
-   this.intervals.map(clearInterval);
-    this.setState(Object.assign({}, this.baseState));
+    this.intervals.map(clearInterval);
+    this.setState(Object.assign({}, this.baseState), () => {
+      this.intervals = [];
+    });
   };
 
   tick = () => {
     if (this.state.openCells > 0 && this.state.gameStatus === "running") {
-      this.setState({ time: this.state.time + 1 });
+      let time = this.state.time + 1;
+      this.setState({ time });
     }
   };
 
@@ -52,8 +67,13 @@ class App extends Component {
   };
 
   handleCellClick = () => {
-    if (this.state.openCells === 0) {
-      this.intervalId = this.setInterval(this.tick, 1000)
+    if (this.state.openCells === 0 && this.state.gameStatus !== "running") {
+      this.setState(
+        {
+          gameStatus: "running"
+        },
+        this.setInterval(this.tick, 1000)
+      );
     }
     this.setState(prevState => {
       return { openCells: prevState.openCells + 1 };
@@ -68,6 +88,7 @@ class App extends Component {
           time={this.state.time}
           flagsUsed={this.state.flagCount}
           reset={this.reset}
+          status={this.state.gameStatus}
         />
         <Board
           openCells={this.state.openCells}

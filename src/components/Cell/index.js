@@ -13,8 +13,20 @@ const Cell = props => {
             }}
             onClick={() => props.open(props.data)}
           >
-            <span>b</span>
+            <span><i className="icon ion-android-radio-button-on"></i></span>
           </div>
+        );
+      } else if (props.data.count === 0) {
+        return (
+          <div
+            className="cell open"
+            onContextMenu={e => {
+              // don't load that nasty context menu, flag it up instead :^)
+              e.preventDefault();
+              props.flag(props.data);
+            }}
+            onClick={() => props.open(props.data)}
+          />
         );
       } else {
         return (
@@ -33,15 +45,15 @@ const Cell = props => {
     } else if (props.data.hasFlag) {
       return (
         <div
-          className="cell open"
+          className="cell open-flag"
           onContextMenu={e => {
             // don't load that nasty context menu, flag it up instead :^)
             e.preventDefault();
-            props.mark(props.data);
+            props.flag(props.data);
           }}
           onClick={() => props.open(props.data)}
         >
-          <span>f</span>
+          <span><i className="icon ion-flag"></i></span>
         </div>
       );
     } else {
@@ -51,7 +63,7 @@ const Cell = props => {
           onContextMenu={e => {
             // don't load that nasty context menu, flag it up instead :^)
             e.preventDefault();
-            props.mark(props.data);
+            props.flag(props.data);
           }}
           onClick={() => props.open(props.data)}
         />

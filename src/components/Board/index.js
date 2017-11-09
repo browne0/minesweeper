@@ -55,14 +55,13 @@ class Board extends Component {
   };
 
   // create function to turn on and off flags
-  mark = cell => {
+  flag = cell => {
     if (this.props.status === "ended") {
       return;
     }
     let rows = this.state.rows;
 
-    let current = rows[cell.y][cell.x];
-    current.hasFlag = !cell.hasFlag;
+    cell.hasFlag = !cell.hasFlag;
     this.setState({ rows });
     this.props.changeFlagAmount(cell.hasFlag ? -1 : 1);
   };
@@ -71,39 +70,42 @@ class Board extends Component {
     if (this.props.status === "ended") {
       return;
     }
-    // first we need to find mines around it
-    let numberOfMines = this.findMines(cell);
-    let rows = this.state.rows;
+    // first we need to find mines around it asynchronously. this is IMPORTANT, because we need to make sure we calculate the mines before anything else runs!!!
+    let asyncCountMines = new Promise(resolve => {
+      let mines = this.findMines(cell);
+      resolve(mines);
+    });
 
-    let current = rows[cell.y][cell.x];
+    asyncCountMines.then(numberOfMines => {
+      let rows = this.state.rows;
 
-    if (!current.isOpen) {
-      this.props.onCellClick();
-    }
+      let current = rows[cell.y][cell.x];
 
-    if (current.hasMine && this.props.openCells === 0) {
-      console.log("mine was on first click");
-      let newRows = this.createBoard(this.props);
-      this.setState({ rows: newRows }, () => {
-        this.open(cell);
-      });
-    } else {
-      if (!cell.hasFlag && !cell.isOpen) {
+      if (current.hasMine && this.props.openCells === 0) {
+        console.log("mine was on first click");
+        let newRows = this.createBoard(this.props);
+        this.setState({ rows: newRows }, () => {
+          this.open(cell);
+        });
+      } else {
+        if (!cell.hasFlag && !current.isOpen) {
+          this.props.onCellClick();
 
-        current.isOpen = true;
-        current.count = numberOfMines;
+          current.isOpen = true;
+          current.count = numberOfMines;
 
-        this.setState({ rows });
-        // now that we know its not a flag and its not a BOMB we should try to open cells around it!
-        if (!current.hasMine && numberOfMines === 0) {
-          this.openAroundCell(cell);
-        }
+          this.setState({ rows });
+          // now that we know its not a flag and its not a BOMB we should try to open cells around it!
+          if (!current.hasMine && numberOfMines === 0) {
+            this.openAroundCell(cell);
+          }
 
-        if (cell.hasMine && this.props.openCells !== 0) {
-          this.props.endGame();
+          if (current.hasMine && this.props.openCells !== 0) {
+            this.props.endGame();
+          }
         }
       }
-    }
+    });
   };
 
   findMines = cell => {
@@ -120,7 +122,7 @@ class Board extends Component {
               this.state.rows[cell.y + row][cell.x + col].hasMine &&
               !(row === 0 && col === 0)
             ) {
-              minesInProximity ++;
+              minesInProximity++;
             }
           }
         }
@@ -152,7 +154,6 @@ class Board extends Component {
     }
   };
 
-  flag = cell => {};
   render() {
     let rows = this.state.rows.map((cells, index) => (
       <Row
@@ -160,7 +161,6 @@ class Board extends Component {
         open={this.open}
         flag={this.flag}
         key={index}
-        mark={this.mark}
       />
     ));
     return <div className="board">{rows}</div>;
