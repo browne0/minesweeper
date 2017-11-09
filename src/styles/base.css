@@ -1,0 +1,24 @@
+h1 {
+  color: red; }
+
+.board {
+  width: 498px;
+  height: 498px;
+  border: 1px solid #444; }
+  .board .row {
+    display: flex;
+    height: 49px;
+    border-bottom: 1px solid #444; }
+    .board .row:last-child {
+      border-bottom: none; }
+    .board .row .cell {
+      border-right: 1px solid #444;
+      width: 49px;
+      display: flex;
+      justify-content: center;
+      align-items: center; }
+      .board .row .cell:last-child {
+        border-right: none; }
+
+html, body, #root {
+  height: 100%; }

@@ -1,0 +1,23 @@
+.board {
+  width: 498px;
+  height: 498px;
+  border: 1px solid #444;
+  .row {
+    display: flex;
+    height: 49px;
+    border-bottom: 1px solid #444;
+    &:last-child{
+      border-bottom: none;
+    }
+    .cell {
+      border-right: 1px solid #444;
+      width: 49px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
+}
